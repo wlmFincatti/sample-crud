@@ -1,0 +1,49 @@
+version: "3.2"
+services:
+  appbot:
+    build: ./bot/
+    container_name: appbot
+    environment:
+      - PROFILE=default
+      - DB_URL=jdbc:postgresql://postgres:5432/crud-sample?createIfNotExists=false
+    ports:
+      - 8082:8082
+    networks:
+      - database
+    depends_on:
+      - postgres
+
+  appmessage:
+    build: ./message/
+    container_name: appmessage
+    environment:
+      - PROFILE=default
+      - DB_URL=jdbc:postgresql://postgres:5432/crud-sample?createIfNotExists=false
+    ports:
+      - 8083:8083
+    networks:
+      - database
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:11
+    container_name: postgres-crud-sample
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres-bot:/var/lib/postgresql/data
+      - ./data.sql:/docker-entrypoint-initdb.d/create_tables.sql
+    environment:
+      POSTGRES_DB: crud-sample
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: user123
+    networks:
+      - database
+
+networks:
+  database:
+    driver: bridge
+
+volumes:
+  postgres-bot:
